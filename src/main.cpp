@@ -117,16 +117,16 @@ static THD_FUNCTION(motor_ctrl_thread, p) {
     drive_meccanum(strafe, drive, rotation);
 
 
-    //if(rc -> channel3 < 370)
+    if(rc -> channel3 < 370)
       for (int i = 0; i < 4; i++)
         motor_output[i] = pid_control_wheel(0, (encoder + i)->speed_rpm,
                                     &motor_error_int[i], &motor_error_der[i],
                                     &previous_error[i]);
-    /*else
+    else
       for (int i = 0; i < 4; i++)
         motor_output[i] = pid_control_wheel(motor_speed_sp[i], (encoder + i)->speed_rpm,
                                     &motor_error_int[i], &motor_error_der[i],
-                                    &previous_error[i]);*/
+                                    &previous_error[i]);
 
 
     can_motorSetCurrent(0x200, motor_output[FL_WHEEL], motor_output[FR_WHEEL],
