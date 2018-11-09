@@ -117,16 +117,16 @@ static THD_FUNCTION(motor_ctrl_thread, p) {
     drive_meccanum(strafe, drive, rotation);
 
 
-    if(rc -> channel3 < 370)
+    //if(rc -> channel3 < 370)
       for (int i = 0; i < 4; i++)
         motor_output[i] = pid_control_wheel(0, (encoder + i)->speed_rpm,
                                     &motor_error_int[i], &motor_error_der[i],
                                     &previous_error[i]);
-    else
+    /*else
       for (int i = 0; i < 4; i++)
         motor_output[i] = pid_control_wheel(motor_speed_sp[i], (encoder + i)->speed_rpm,
                                     &motor_error_int[i], &motor_error_der[i],
-                                    &previous_error[i]);
+                                    &previous_error[i]);*/
 
 
     can_motorSetCurrent(0x200, motor_output[FL_WHEEL], motor_output[FR_WHEEL],
@@ -167,14 +167,14 @@ int main(void) {
 
   while (true) {
     palTogglePad(GPIOA, GPIOA_LED);
-    palSetPad(GPIOA, 7);
+    palSetPad(GPIOA, 1);
     palClearPad(GPIOA, 2);
 
     gripper::rotate(rc->s2);
 
     gripper::grip(rc->channel3-364);
 
-    gripper::sub_grip(rc->s1 - 2);
+    if(rc->s1 != 3) gripper::sub_grip(rc->s1 - 1);
 
 
 
