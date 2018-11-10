@@ -7,6 +7,8 @@
 #include "ch.h"
 #include "hal.h"
 
+#include "gripper.hpp"
+
 #include "canBusProcess.h"
 
 static volatile Encoder_canStruct _encoder[CHASSIS_MOTOR_NUM];
@@ -108,6 +110,9 @@ static THD_FUNCTION(can_rx, p) {
     }
   }
   chEvtUnregister(&canp->rxfull_event, &el);
+  volatile Encoder_canStruct* encoder = can_getEncoder(); //Pointer to motor encoder feedback
+
+  gripper::initial_angle = (encoder)->radian_angle;
 }
 
 /*

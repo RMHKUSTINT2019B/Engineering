@@ -35,7 +35,10 @@ void gripper::rotate(int button){
                                  &motor_error_int, &motor_error_der,
                                  &previous_error);
       can_motorSetCurrent(0x1FF, 0.25*motor_output, 0, 0, 0);
-      if((encoder)->radian_angle == 105*(pi/180)*19+initial_angle) break;
+      if((encoder)->radian_angle == 105*(pi/180)*19+initial_angle) {
+        can_motorSetCurrent(0x1FF, 0, 0, 0, 0);
+        break;
+      }
     }
     else if(button == 3){               //rotate the arm backward, meanwhile close the box
       motor_output = pid_control(initial_angle,
@@ -43,14 +46,21 @@ void gripper::rotate(int button){
                                  &motor_error_int, &motor_error_der,
                                  &previous_error);
       can_motorSetCurrent(0x1FF, 15*motor_output, 0, 0, 0);
-      if((encoder)->radian_angle == initial_angle) break;
+      if((encoder)->radian_angle == initial_angle) {
+        can_motorSetCurrent(0x1FF, 0, 0, 0, 0);
+        break;
+      }
     }
     else if(button == 2){               //maintain the location of the arm, open the box
-      palSetPad(GPIOA,2);
+      palClearPad(GPIOA,2);
       chThdSleepMilliseconds(2000);
+      palSetPad(GPIOA,2);
     }
     chThdSleepMilliseconds(2);
-    if((encoder)->speed_rpm == 0) break;
+    if((encoder)->speed_rpm == 0) {
+      can_motorSetCurrent(0x1FF, 0, 0, 0, 0);
+      break;
+    }
   }
 }
 
@@ -61,7 +71,7 @@ void gripper::sub_grip(bool action){
       palSetPad(GPIOA,7);
       chThdSleepMilliseconds(1000);
       palSetPad(GPIOA,0);
-      chThdSleepMilliseconds(200);
+      chThdSleepMilliseconds(1000);
     }
     else{                   //action2:down,relax,up
       palClearPad(GPIOA,0);
@@ -69,7 +79,7 @@ void gripper::sub_grip(bool action){
       palClearPad(GPIOA,7);
       chThdSleepMilliseconds(1000);
       palSetPad(GPIOA,0);
-      chThdSleepMilliseconds(200);
+      chThdSleepMilliseconds(1000);
     }
 }
 

@@ -117,11 +117,14 @@ static THD_FUNCTION(motor_ctrl_thread, p) {
     drive_meccanum(strafe, drive, rotation);
 
 
-    if(rc -> channel3 < 370)
+    if(rc -> channel3 > 1024){
+      gripper::rotate(3);
+
       for (int i = 0; i < 4; i++)
         motor_output[i] = pid_control_wheel(0, (encoder + i)->speed_rpm,
                                     &motor_error_int[i], &motor_error_der[i],
                                     &previous_error[i]);
+    }
     else
       for (int i = 0; i < 4; i++)
         motor_output[i] = pid_control_wheel(motor_speed_sp[i], (encoder + i)->speed_rpm,
@@ -153,9 +156,13 @@ int main(void) {
 
   rc = RC_get();
 
-  volatile Encoder_canStruct* encoder = can_getEncoder(); //Pointer to motor encoder feedback
 
-  gripper::initial_angle = (encoder)->radian_angle;
+
+  palSetPad(GPIOA, 0);
+  palSetPad(GPIOA, 1);
+  palSetPad(GPIOA, 2);
+  palSetPad(GPIOA, 7);
+
 
   chThdCreateStatic(motor_ctrl_thread_wa, sizeof(motor_ctrl_thread_wa),
                     NORMALPRIO,
@@ -167,16 +174,12 @@ int main(void) {
 
   while (true) {
     palTogglePad(GPIOA, GPIOA_LED);
-    palSetPad(GPIOA, 1);
-    palClearPad(GPIOA, 2);
 
     gripper::rotate(rc->s2);
 
     gripper::grip(rc->channel3-364);
 
     if(rc->s1 != 3) gripper::sub_grip(rc->s1 - 1);
-
-
 
     chThdSleepMilliseconds(2);
   }
